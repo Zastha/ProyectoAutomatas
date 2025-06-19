@@ -1,0 +1,11 @@
+minimo float ;
+maximo float ;
+
+if minimo == maximo then
+	print maximo + minimo
+else
+   print minimo + maximo ;
+
+print minimo + maximo 
+
+end

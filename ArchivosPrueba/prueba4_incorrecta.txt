@@ -1,0 +1,14 @@
+y float ;
+z int ;
+
+if x == y then
+	begin
+		if y == z then
+			print x + z
+		else
+			print y + z
+	end
+else
+			print x + y
+		then
+			print z + z
