@@ -65,38 +65,37 @@ public class Parser {
         createTable();
         Statx s = S();
         
+        if (tknCode != 0) { // 0 representa el fin del archivo
+            error(token, "<FIN DEL ARCHIVO>");
+        }
+
         return new Programax(tablaSimbolos,s);
     }
     
     public Declarax D() {
-      if(tknCode == id) {
-        if(stringToCode(s.getToken(false)) == intx || stringToCode(s.getToken(false)) == floatx) {
-          String s = token;
-          eat(id); Typex t = T(); eat(semi); D();
-          tablaSimbolos.addElement(new Declarax(s, t));
-          return new Declarax(s, t);
-        }
-        else{return null;}
-      }
+        if (tknCode == id) {
+            String s = token;
+            eat(id);
+            Typex t = T();
+            eat(semi);
+            Declarax decl = new Declarax(s, t);
+            tablaSimbolos.addElement(decl);
+            D();
+            return decl;
+        } else {
+            return null;    }
+    }           
 
-      else if(tknCode != id){return null;}
-      else{
-        error(token, "(id)");
-        return null;
-      }            
-    }
     
     public Typex T() {
         if(tknCode == intx) {
             eat(intx);
             return new Typex("int");
-        }
-        else if(tknCode == floatx) {
+        } else if(tknCode == floatx) {
             eat(floatx);
             return new Typex("float");
-        }
-        else{
-            error(token, "(int | float)");
+        } else {
+            error(token, "(int / float)");
             return null;
         }
     }
@@ -104,89 +103,88 @@ public class Parser {
     public Statx S() { //return statement
         switch(tknCode) {
             case ifx:
-                Expx e1;
-                Statx s1, s2;
                 eat(ifx);
-                e1= E();
+                Expx e1 = E();
                 eat(thenx);
-                s1=S();
+                Statx s1 = S();
                 eat(elsex);
-                s2=S();                
+                Statx s2 = S();
                 return new Ifx(e1, s1, s2);
-
                 
             case beginx:
-                eat(beginx);    S();    L();
+                eat(beginx); 
+                s1 = S();    
+                L();
                 return null;
                 
             case id:
-                Idx i;
-                Expx e;
-                eat(id);   i=new Idx(tokenActual);  declarationCheck(tokenActual); byteCode("igual", tokenActual);  eat(igual);   e=E();
-                return new Asignax(i, e);
-                
+                String varName = token;
+                eat(id);
+                declarationCheck(varName);
+                eat(igual); // :=
+                Expx e = E();
+                return new Asignax(new Idx(varName), e);
+       
             case printx:
-                Expx ex;
-                eat(printx);    ex=E();
-                return new Printx(ex);
+                eat(printx);    
+                e = E();
+                return new Printx(e);
                 
-            default: error(token, "(if | begin | id | print)");
-                return null;
+            default: 
+            error(token, "(if | begin | id | print)");
+            return null;
         }
     }
     
     public void L() {       
-        switch(tknCode) {
-            case endx:
-                eat(endx);
-            break;
-                
-            case semi:
-                eat(semi);      S();    L();
-            break;
-            default: error(token, "(end | ;)");
+        if (tknCode == endx) {
+            eat(endx);
+        } else if (tknCode == semi) {
+            eat(semi);
+            S();
+            L();
+        } else {
+            error(token, "(end | ;)");
         }
     }
     
     public Expx E() {
-       Idx i1, i2;
-       String comp1, comp2;
-       
-       if(tknCode == id) {
-           comp1 = token;
-           declarationCheck(token);
-           eat(id); 
-           i1 = new Idx(token); 
-           switch(stringToCode(token)) {
-               
-               case sum:  
-                   comp2 = tokenActual;
-                   eat(sum);   eat(id);
-                   i2 = new Idx(comp2); //(tokenActual)
-                   declarationCheck(comp2);
-                   compatibilityCheck(comp1,comp2);
-                   byteCode("suma", comp1, comp2);
-                   System.out.println("Operación: " + comp1 + " + " + comp2);
-                   return new Sumax(i1, i2);
-                   
-               case igualdad:
-                   comp2 = tokenActual;
-                   eat(igualdad);   eat(id);
-                   i2 = new Idx(comp2);
-                   declarationCheck(comp2);
-                   compatibilityCheck(comp1,comp2);
-                   byteCode("igualdad", comp1, comp2);
-                   return new Comparax(i1, i2);
-                   
-               default: 
-                   error(token, "(+ / ==)");
-                   return null;
-           }
-       }
-       else{
-           error(token, "(id)");
-           return null;
-       }
+        if (tknCode == id) {
+            String left = token;
+            declarationCheck(left);
+            eat(id);
+            if (tknCode == igualdad) { // ==
+                eat(igualdad);
+                if (tknCode == id) {
+                    String right = token;
+                    declarationCheck(right);
+                    eat(id);
+                    compatibilityCheck(left, right);
+                    return new Comparax(new Idx(left), new Idx(right));
+                } else {
+                    error(token, "(id)");
+                    return null;
+                }
+            } else if (tknCode == sum) { // +
+                eat(sum);
+                if (tknCode == id) {
+                    String right = token;
+                    declarationCheck(right);
+                    eat(id);
+                    compatibilityCheck(left, right);
+                    return new Sumax(new Idx(left), new Idx(right));
+                } else {
+                    error(token, "(id)");
+                    return null;
+                }
+            } else {
+                error(token, "(== | +)");
+                return null;
+            }
+        } else {
+            error(token, "(id)");
+            return null;
+        }
     } //FIN DEL ANÁLISIS SINTÁCTICO
     
     
@@ -210,7 +208,7 @@ public class Parser {
     }
     
     public int stringToCode(String t) {
-        int codigo = 0; 
+        int codigo = 0;
         switch(t) {
             case "if": codigo=1; break;    
             case "then": codigo=2; break;
@@ -281,7 +279,7 @@ public class Parser {
             }
         }
         if(!valido) {
-            System.out.println("La variable "+ s +  " no está declarada.");
+            System.out.println("La variable "+ s +  " no está declarada.\nSe detuvo la ejecución.");
              javax.swing.JOptionPane.showMessageDialog(null, "La variable [" + s + "] no está declarada", "Error",
                    javax.swing.JOptionPane.ERROR_MESSAGE);
         }
@@ -291,22 +289,22 @@ public class Parser {
     public void compatibilityCheck(String s1, String s2) {
         Declarax elementoCompara1;
         Declarax elementoCompara2;
-        System.out.println("REVISANDO LA COMPATIBILIDAD ENTRE TIPOS ("+s1+", "+s2+"). ");
+        System.out.println("CHECANDO COMPATIBILIDAD ENTRE TIPOS ("+s1+", "+s2+"). ");
         boolean termino = false;
         for(int i=0; i<tablaSimbolos.size() ; i++) {
           elementoCompara1 = (Declarax) tablaSimbolos.elementAt(i);
           if(s1.equals(elementoCompara1.s1)) {
-            System.out.println("Se encontró el primer elemento en la tabla de símbolos.");
+            System.out.println("Se encontró el primer elemento en la tabla de símbolos...");
             for(int j=0; j<tablaSimbolos.size() ; j++) {
               elementoCompara2 = (Declarax) tablaSimbolos.elementAt(j);
               if(s2.equals(elementoCompara2.s1)) {
-                System.out.println("Se encontró el segundo elemento en la tabla de símbolos.");
+                System.out.println("Se encontró el segundo elemento en la tabla de símbolos...");
                 if(tipo[i].equals(tipo[j])) {
                   termino = true;
                   break;
                 }else{
                   termino = true;
-                    javax.swing.JOptionPane.showMessageDialog(null, "Incompatibilidad de tipos entre las variables: "+ elementoCompara1.s1 +" ("
+                    javax.swing.JOptionPane.showMessageDialog(null, "Incompatibilidad de tipos: "+ elementoCompara1.s1 +" ("
                       + elementoCompara1.s2.getTypex() + "), "+elementoCompara2.s1 +" (" + elementoCompara2.s2.getTypex()
                       +").", "Error",
                       javax.swing.JOptionPane.ERROR_MESSAGE);
