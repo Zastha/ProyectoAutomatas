@@ -74,7 +74,7 @@ public class Parser {
     }
     
     public Declarax D() {
-        if (tknCode == id) {
+        if (tknCode == id && (s.checkNextToken().equals("int") || s.checkNextToken().equals("float"))) {
             String s = token;
             eat(id);
             Typex t = T();
