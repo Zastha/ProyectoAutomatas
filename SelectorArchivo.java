@@ -11,10 +11,10 @@ public class SelectorArchivo {
     public SelectorArchivo(){
         JFileChooser jfc = new JFileChooser();
         jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-       jfc.setDialogTitle("Selecciona Archivo a compilar");
-       jfc.setCurrentDirectory(new File("ArchivosPrueba"));
-       FileNameExtensionFilter fnef = new FileNameExtensionFilter("Archivos a Compilar","txt");
-       jfc.setFileFilter(fnef);
+        jfc.setDialogTitle("Selecciona Archivo a compilar");
+        jfc.setCurrentDirectory(new File("ArchivosPrueba"));
+        FileNameExtensionFilter fnef = new FileNameExtensionFilter("Archivos a Compilar","txt");
+        jfc.setFileFilter(fnef);
 
         if(jfc.showOpenDialog(null) != JFileChooser.CANCEL_OPTION){
 

@@ -29,7 +29,7 @@ public class Parser {
     private int retornos[]= new int[10];
     private int cntIns = 0;
     //---------------------------------------------
-  
+
 /*     public static void main(String[] args){
         //var1 int ; var2 int; if var1 == var2 then print var1 + var2 else begin	if var1 + var2 then var1 := var2 + var1	else var2 := var1 + var2 end
         new Parser("var1 int ; var2 int ; var1 := var2 + var1 ; print var1 + var2 ;");
