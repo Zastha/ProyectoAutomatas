@@ -140,11 +140,11 @@ public class Scanner {
         tokenQuedado = tokens[contar];
         return tokenQuedado;
     }
-    public void restoTokens(){
-        for(int i = contar; i < (longitud - 1); i++){
-            System.out.println(tokens[i]);
-        }
-    }
+    // public void restoTokens(){
+    //     for(int i = contar; i < (longitud - 1); i++){
+    //         System.out.println(tokens[i]);
+    //     }
+    // }
     
     public void error(String error) {
         switch(JOptionPane.showConfirmDialog(null,
