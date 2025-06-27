@@ -65,8 +65,9 @@ public class Parser {
         createTable();
         Statx s = S();
         
-        if (tknCode != 0) { // 0 representa el fin del archivo
-            error(token, "<FIN DEL ARCHIVO>");
+        if (this.s.getLongitud() - 1 != this.s.getContar()) {
+            System.out.println("Hay más tokens después de terminar los estatutos. Los siguientes tokens no fueron tomados en cuenta para el análisis");
+            errorSobrante(this.s.getTokenQuedado(), "Hay tokens más allá de los estatutos evaluados");
         }
 
         return new Programax(tablaSimbolos,s);
@@ -124,7 +125,7 @@ public class Parser {
                 eat(igual); // :=
                 Expx e = E();
                 return new Asignax(new Idx(varName), e);
-       
+
             case printx:
                 eat(printx);    
                 e = E();
@@ -206,6 +207,18 @@ public class Parser {
                 break;
         }
     }
+
+public void errorSobrante(String token, String t) {
+    JOptionPane.showMessageDialog(
+        null,
+        "Error sintáctico:\n"
+        + "No se evaluarán los tokens a partir de: (" + token + ").\n"
+        + t + ".",
+        "Ha ocurrido un error",
+        JOptionPane.ERROR_MESSAGE
+    );
+}
+
     
     public int stringToCode(String t) {
         int codigo = 0;
@@ -280,8 +293,8 @@ public class Parser {
         }
         if(!valido) {
             System.out.println("La variable "+ s +  " no está declarada.\nSe detuvo la ejecución.");
-             javax.swing.JOptionPane.showMessageDialog(null, "La variable [" + s + "] no está declarada", "Error",
-                   javax.swing.JOptionPane.ERROR_MESSAGE);
+            javax.swing.JOptionPane.showMessageDialog(null, "La variable [" + s + "] no está declarada", "Error",
+            javax.swing.JOptionPane.ERROR_MESSAGE);
         }
     }
     
@@ -292,30 +305,30 @@ public class Parser {
         System.out.println("CHECANDO COMPATIBILIDAD ENTRE TIPOS ("+s1+", "+s2+"). ");
         boolean termino = false;
         for(int i=0; i<tablaSimbolos.size() ; i++) {
-          elementoCompara1 = (Declarax) tablaSimbolos.elementAt(i);
-          if(s1.equals(elementoCompara1.s1)) {
+        elementoCompara1 = (Declarax) tablaSimbolos.elementAt(i);
+        if(s1.equals(elementoCompara1.s1)) {
             System.out.println("Se encontró el primer elemento en la tabla de símbolos...");
             for(int j=0; j<tablaSimbolos.size() ; j++) {
-              elementoCompara2 = (Declarax) tablaSimbolos.elementAt(j);
-              if(s2.equals(elementoCompara2.s1)) {
+                elementoCompara2 = (Declarax) tablaSimbolos.elementAt(j);
+                if(s2.equals(elementoCompara2.s1)) {
                 System.out.println("Se encontró el segundo elemento en la tabla de símbolos...");
                 if(tipo[i].equals(tipo[j])) {
-                  termino = true;
-                  break;
+                    termino = true;
+                    break;
                 }else{
-                  termino = true;
+                    termino = true;
                     javax.swing.JOptionPane.showMessageDialog(null, "Incompatibilidad de tipos: "+ elementoCompara1.s1 +" ("
-                      + elementoCompara1.s2.getTypex() + "), "+elementoCompara2.s1 +" (" + elementoCompara2.s2.getTypex()
-                      +").", "Error",
-                      javax.swing.JOptionPane.ERROR_MESSAGE);
+                        + elementoCompara1.s2.getTypex() + "), "+elementoCompara2.s1 +" (" + elementoCompara2.s2.getTypex()
+                        +").", "Error",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
                 }
                 break;
-              }
+                }
             }
-          }
-          if(termino) {
+        }
+        if(termino) {
             break;
-          }
+        }
         }
     }
     
@@ -332,19 +345,19 @@ public class Parser {
         }
         
         switch(tipo) {
-          case "igualdad":
+        case "igualdad":
             ipbc(cntIns + ": iload_"+pos1);
             ipbc(cntIns + ": iload_"+pos2);
             ipbc(cntIns + ": ifne " + (cntIns+4));
             jmp1 = cntBC;
-          break;
+        break;
 
-          case "suma":
+        case "suma":
             ipbc(cntIns + ": iload_"+pos1);
             ipbc(cntIns + ": iload_"+pos2);
             ipbc(cntIns + ": iadd");
             jmp2 = cntBC;
-          break;
+        break;
         }
     }
     

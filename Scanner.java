@@ -7,10 +7,11 @@ import javax.swing.JOptionPane;
 public class Scanner {
     
 //DECLARACIONES
-    private int lineaNo, k;
+    private int contar = 0;
+    private int lineaNo, k, longitud;
     private final String[] tokens;
     private String tipoToken;
-    private String token;
+    private String token, tokenQuedado;
     private final String[] reservadas = {"if", "then", "else", "begin", "print", "end", "int", "float"};
     private final String[] operadores = {"==", ":=", "+"};
     private final String delimitador = ";";
@@ -30,6 +31,7 @@ public class Scanner {
         lineaNo = 0; //Aun sin implementar...
         k=0;
         token = "";
+        longitud = tokens.length;
     }
     
 //MÉTODO que retorna tokens válidos al parser
@@ -39,9 +41,10 @@ public class Scanner {
         if(b) {
             if(k < tokens.length-1) {
             k++;
+            contar++;
             }
         }
-                
+
         //VERIFICACIÓN LÉXICA
         //Palabras reservadas:
         for (String reservada : reservadas) {
@@ -118,13 +121,29 @@ public class Scanner {
             tipoToken = tipo;
         }
     }
-       
+
     public String getTipoToken() {
         return tipoToken;
     }
     
     public String checkNextToken() {
         return tokens[k];
+    }
+    public int getLongitud(){
+        return longitud;
+    }
+    public int getContar(){
+        contar -= 1;
+        return contar + 1;
+    }
+    public String getTokenQuedado(){
+        tokenQuedado = tokens[contar];
+        return tokenQuedado;
+    }
+    public void restoTokens(){
+        for(int i = contar; i < (longitud - 1); i++){
+            System.out.println(tokens[i]);
+        }
     }
     
     public void error(String error) {
