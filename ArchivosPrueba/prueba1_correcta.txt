@@ -1,5 +1,5 @@
 var1 int ;
-var2 int ;
+var2 long ;
 
 if var1 == var2 then
 	print var1 + var2
