@@ -74,7 +74,8 @@ public class Parser {
     }
     
     public Declarax D() {
-        if (tknCode == id && (s.checkNextToken().equals("int") || s.checkNextToken().equals("float"))) {
+        if (tknCode == id && (s.checkNextToken().equals("int") || s.checkNextToken().equals("float") || 
+        s.checkNextToken().equals("long") || s.checkNextToken().equals("double") )) {
             String s = token;
             eat(id);
             Typex t = T();
@@ -241,9 +242,9 @@ public void errorSobrante(String token, String t) {
             case "==": codigo=10; break;
             case "int": codigo=11; break;
             case "float": codigo=12; break;
-            case "long" : codigo=13; break;
-            case "double": codigo=14; break;
-            default: codigo=15; break;
+            case "long" : codigo=14; break;
+            case "double": codigo=15; break;
+            default: codigo=13; break;
         }
         return codigo;
     }
@@ -323,7 +324,12 @@ public void errorSobrante(String token, String t) {
                 if(tipo[i].equals(tipo[j])) {
                     termino = true;
                     break;
-                }else{
+                } else if ((tipo[i].equals("int") && tipo[j].equals("long")) || (tipo[i].equals("long") && tipo[j].equals("int")) ||
+                 (tipo[i].equals("double") && tipo[j].equals("float")) || (tipo[i].equals("float") && tipo[j].equals("double"))) {
+                    termino = true;
+                    break;
+                }
+                else{
                     termino = true;
                     javax.swing.JOptionPane.showMessageDialog(null, "Incompatibilidad de tipos: "+ elementoCompara1.s1 +" ("
                         + elementoCompara1.s2.getTypex() + "), "+elementoCompara2.s1 +" (" + elementoCompara2.s2.getTypex()
@@ -352,18 +358,21 @@ public void errorSobrante(String token, String t) {
             }
         }
         
+        String prefijo1=preTipo(s1);
+        String prefijo2=preTipo(s2);
+        String prefijoSigma=preTipo(tipoSigma(s1,s2));
         switch(tipo) {
         case "igualdad":
-            ipbc(cntIns + ": iload_"+pos1);
-            ipbc(cntIns + ": iload_"+pos2);
+            ipbc(cntIns + ": " + prefijo1 + "load_" + pos1);
+            ipbc(cntIns + ": " + prefijo2 + "load_" + pos2);
             ipbc(cntIns + ": ifne " + (cntIns+4));
             jmp1 = cntBC;
         break;
 
         case "suma":
-            ipbc(cntIns + ": iload_"+pos1);
-            ipbc(cntIns + ": iload_"+pos2);
-            ipbc(cntIns + ": iadd");
+            ipbc(cntIns + ": " + prefijo1 + "load_" + pos1);
+            ipbc(cntIns + ": " + prefijo2 + "load_" + pos2);
+            ipbc(cntIns + ": " + prefijoSigma + "add");
             jmp2 = cntBC;
         break;
         }
@@ -376,13 +385,14 @@ public void errorSobrante(String token, String t) {
                 pos1 = i;
             }
         }
-        switch(tipo) {
-            case "igual":
-                pilaBC[cntBC+3] = cntIns+4 + ": istore_" + pos1;
-                cntIns++;
-                jmp2 = cntBC;
+        String prefijo=preTipo(s1);
+        switch (tipo) {
+        case "igual":
+            pilaBC[cntBC + 3] = cntIns + 4 + ": " + prefijo + "store_" + pos1;
+            cntIns++;
+            jmp2 = cntBC;
             break;
-        }
+    }
     }
     
     public void ipbc(String ins) {
@@ -402,6 +412,40 @@ public void errorSobrante(String token, String t) {
             }
         }
         return JBC;
-    }    
+    }
+    private String tipoSigma(String tipo1, String tipo2){
+        if (tipo1.equals(tipo2)) {
+            return tipo1;
+        } else if (tipo1.equals("int") && tipo2.equals("long") ||
+        tipo1.equals("long") && tipo2.equals("int") ) {
+            return "long";
+        } else if (tipo1.equals("double") && tipo2.equals("float") ||
+        tipo1.equals("float") && tipo2.equals("double") ) {
+            return "double";
+        } else{
+        return null;
+    }
+    }
+    private String tipoVariable(String nombreVar) {
+    for (int i = 0; i < variable.length; i++) {
+        if (nombreVar.equals(variable[i])) {
+            return tipo[i];
+        }
+    }
+    return "int";
+}
+private String preTipo(String tipo){
+    String prefijo="";
+    if (tipo=="int") {
+        prefijo="i";
+    }else if (tipo=="float") {
+        prefijo="f";
+    }else if (tipo=="long") {
+        prefijo="l";
+    }else if (tipo=="double") {
+        prefijo="d";
+    }
+return prefijo;
+}    
 }
 
