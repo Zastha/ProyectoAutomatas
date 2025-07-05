@@ -1,4 +1,5 @@
 
 package ArbolSintactico;
 
-public abstract class Expx {}
+public abstract class Expx {
+}
