@@ -456,6 +456,24 @@ public class Parser {
                 ipbc(cntIns + ": " + prefijoSigma + "add");
                 jmp2 = cntBC;
                 break;
+            case "resta":
+                ipbc(cntIns + ": " + prefijo1 + "load_" + pos1);
+                ipbc(cntIns + ": " + prefijo2 + "load_" + pos2);
+                ipbc(cntIns + ": " + prefijoSigma + "sub");
+                jmp2 = cntBC;
+                break;
+            case "multiplicacion":
+                ipbc(cntIns + ": " + prefijo1 + "load_" + pos1);
+                ipbc(cntIns + ": " + prefijo2 + "load_" + pos2);
+                ipbc(cntIns + ": " + prefijoSigma + "mul");
+                jmp2 = cntBC;
+                break;
+            case "division":
+                ipbc(cntIns + ": " + prefijo1 + "load_" + pos1);
+                ipbc(cntIns + ": " + prefijo2 + "load_" + pos2);
+                ipbc(cntIns + ": " + prefijoSigma + "div");
+                jmp2 = cntBC;
+                break;
         }
     }
 
