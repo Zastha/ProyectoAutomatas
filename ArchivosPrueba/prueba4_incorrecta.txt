@@ -1,4 +1,5 @@
-y float ;
+x double ;
+y double ;
 z int ;
 
 if x == y then

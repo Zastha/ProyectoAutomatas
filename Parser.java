@@ -56,7 +56,7 @@ public class Parser {
 
     public void eat(int t) {
         tokenEsperado = t;
-        if (tknCode == t) {
+        if (tknCode == tokenEsperado) {
             setLog("Token: " + token + "\n" + "Tipo:  " + s.getTipoToken());
             advance();
         } else {
@@ -355,7 +355,7 @@ public class Parser {
         System.out.println("-----------------");
         for (int i = 0; i < tablaSimbolos.size(); i++) {
             Declarax dx;
-            Typex tx;
+            //Typex tx;
             dx = (Declarax) tablaSimbolos.get(i);
             variable[i] = dx.s1;
             tipo[i] = dx.s2.getTypex();
@@ -385,20 +385,28 @@ public class Parser {
     }
 
     // Chequeo de tipos consultando la tabla de símbolos
+    // Error por reverse
     public void compatibilityCheck(String s1, String s2) {
-        Declarax elementoCompara1;
-        Declarax elementoCompara2;
+        String elementoCompara1;
+        String elementoCompara2;
+        String tipoCompara1;
+        String tipoCompara2;
         System.out.println("CHECANDO COMPATIBILIDAD ENTRE TIPOS (" + s1 + ", " + s2 + "). ");
         boolean termino = false;
         for (int i = 0; i < tablaSimbolos.size(); i++) {
-            elementoCompara1 = (Declarax) tablaSimbolos.elementAt(i);
-            if (s1.equals(elementoCompara1.s1)) {
+            //elementoCompara1 = (Declarax) tablaSimbolos.elementAt(i);
+            elementoCompara1 =  variable[i];
+            tipoCompara1 = tipo[i];
+           // if (s1.equals(elementoCompara1.s1)) {
+                if (s1.equals(elementoCompara1)) {
                 System.out.println("Se encontró el primer elemento en la tabla de símbolos...");
                 for (int j = 0; j < tablaSimbolos.size(); j++) {
-                    elementoCompara2 = (Declarax) tablaSimbolos.elementAt(j);
-                    if (s2.equals(elementoCompara2.s1)) {
+                    //elementoCompara2 = (Declarax) tablaSimbolos.elementAt(j);
+                    elementoCompara2 = variable[j];
+                    tipoCompara2 = tipo[j]; 
+                    if (s2.equals(elementoCompara2)) {
                         System.out.println("Se encontró el segundo elemento en la tabla de símbolos...");
-                        if (tipo[i].equals(tipo[j])) {
+                        if (tipoCompara1.equals(tipoCompara2)) {
                             termino = true;
                             break;
                         } else if ((tipo[i].equals("int") && tipo[j].equals("long"))
@@ -410,9 +418,9 @@ public class Parser {
                         } else {
                             termino = true;
                             javax.swing.JOptionPane.showMessageDialog(null,
-                                    "Incompatibilidad de tipos: " + elementoCompara1.s1 + " ("
-                                            + elementoCompara1.s2.getTypex() + "), " + elementoCompara2.s1 + " ("
-                                            + elementoCompara2.s2.getTypex()
+                                    "Incompatibilidad de tipos: " + elementoCompara1 + " ("
+                                            + tipoCompara1 + "), " + elementoCompara2 + " ("
+                                            + tipoCompara2
                                             + ").",
                                     "Error",
                                     javax.swing.JOptionPane.ERROR_MESSAGE);
