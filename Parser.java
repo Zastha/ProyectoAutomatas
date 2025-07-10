@@ -15,7 +15,7 @@ public class Parser {
     private final Scanner s;
     final int ifx = 1, thenx = 2, elsex = 3, beginx = 4, endx = 5, printx = 6, semi = 7,
             sum = 8, igual = 9, igualdad = 10, intx = 11, floatx = 12, id = 13, longx = 14, doublex = 15, res = 16,
-            multi = 17, div = 18;
+            multi = 17, div = 18, whilex = 19, dox = 20;
     private int tknCode, tokenEsperado;
     private String token, tokenActual, log;
 
@@ -142,6 +142,13 @@ public class Parser {
                 eat(printx);
                 e = E();
                 return new Printx(e);
+
+            case whilex:
+                eat(whilex);
+                Expx eWhile = E();
+                eat(dox);
+                Statx sWhile = S();
+                return new Whilex(eWhile, sWhile);
 
             default:
                 error(token, "(if | begin | id | print)");
@@ -286,6 +293,12 @@ public class Parser {
                 break;
             case "print":
                 codigo = 6;
+                break;
+            case "while":
+                codigo = 19;
+                break;
+            case "do":
+                codigo = 20;
                 break;
             case ";":
                 codigo = 7;

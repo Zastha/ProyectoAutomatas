@@ -13,7 +13,7 @@ public class Scanner {
     private String tipoToken;
     private String token, tokenQuedado;
     private final String[] reservadas = { "if", "then", "else", "begin", "print", "end", "int", "float", "long",
-            "double" };
+            "double", "while", "do" };
     private final String[] operadores = { "==", ":=", "+", "*", "-", "/" };
     private final String delimitador = ";";
 
