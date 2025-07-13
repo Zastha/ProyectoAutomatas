@@ -151,7 +151,7 @@ public class Parser {
                 return new Whilex(eWhile, sWhile);
 
             default:
-                error(token, "(if | begin | id | print)");
+                error(token, "(if | begin | id | print | while)");
                 return null;
         }
     }
@@ -169,81 +169,69 @@ public class Parser {
     }
 
     public Expx E() {
-        if (tknCode == id) {
-            String left = token;
-            declarationCheck(left);
-            eat(id);
-            if (tknCode == igualdad) { // ==
-                eat(igualdad);
-                if (tknCode == id) {
-                    String right = token;
-                    declarationCheck(right);
-                    eat(id);
-                    compatibilityCheck(left, right);
-                    return new Comparax(new Idx(left), new Idx(right));
-                } else {
-                    error(token, "(id)");
-                    return null;
-                }
-            } else if (tknCode == sum) { // +
-                eat(sum);
-                if (tknCode == id) {
-                    String right = token;
-                    declarationCheck(right);
-                    eat(id);
-                    compatibilityCheck(left, right);
-                    return new Sumax(new Idx(left), new Idx(right));
-                } else {
-                    error(token, "(id)");
-                    return null;
-                }
-            } else if (tknCode == res) { // -
-                eat(res);
-                if (tknCode == id) {
-                    String right = token;
-                    declarationCheck(right);
-                    eat(id);
-                    compatibilityCheck(left, right);
-                    return new Restax(new Idx(left), new Idx(right));
-                } else {
-                    error(token, "(id)");
-                    return null;
-                }
+    if (tknCode == id) {
+        String left = token;
 
-            } else if (tknCode == multi) { // *
-                eat(multi);
-                if (tknCode == id) {
-                    String right = token;
-                    declarationCheck(right);
-                    eat(id);
-                    compatibilityCheck(left, right);
-                    return new Multix(new Idx(left), new Idx(right));
-                } else {
-                    error(token, "(id)");
-                    return null;
-                }
-            } else if (tknCode == div) { // /
-                eat(div);
-                if (tknCode == id) {
-                    String right = token;
-                    declarationCheck(right);
-                    eat(id);
-                    compatibilityCheck(left, right);
-                    return new Divix(new Idx(left), new Idx(right));
-                } else {
-                    error(token, "(id)");
-                    return null;
-                }
+        declarationCheck(left);
+        eat(id);
+        
+        
+        if (tknCode == 8 || tknCode == 16 || tknCode == 17 || tknCode == 18) { 
 
+            int operator = tknCode; 
+            eat(tknCode); 
+            
+            if (tknCode == id) {
+                String right = token;
+
+
+                declarationCheck(right);
+                eat(id);
+                compatibilityCheck(left, right);
+                
+         
+                switch (operator) {
+
+                    case 8:   return new Sumax(new Idx(left), new Idx(right));      
+                    case 16:    return new Restax(new Idx(left), new Idx(right)); 
+                    case 17:    return new Multix(new Idx(left), new Idx(right));  
+                    case 18:    return new Divix(new Idx(left), new Idx(right));    
+                    default:    throw new RuntimeException("Unknown operator");
+
+                }
             } else {
-                error(token, "(== | +)");
+
+                error(token, "(id)");
+                return null;
+
+
+            }
+        } else if (tknCode == igualdad) { 
+
+            eat(igualdad);
+            if (tknCode == id) {
+
+                String right = token;
+
+                declarationCheck(right);
+                eat(id);
+                compatibilityCheck(left, right);
+
+                return new Comparax(new Idx(left), new Idx(right));
+            } else {
+
+                error(token, "(id)");
                 return null;
             }
         } else {
-            error(token, "(id)");
+            error(token, "(== | + | - | * | /)");
             return null;
         }
-    } // FIN DEL ANÁLISIS SINTÁCTICO
+    } else {
+        error(token, "(id)");
+        return null;
+    }
+} // FIN DEL ANÁLISIS SINTÁCTICO
 
     public void error(String token, String t) {
         switch (JOptionPane.showConfirmDialog(null,
