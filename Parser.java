@@ -237,7 +237,7 @@ public class Parser {
         switch (JOptionPane.showConfirmDialog(null,
                 "Error sintáctico:\n"
                         + "El token:(" + token + ") no concuerda con la gramática del lenguaje,\n"
-                        + "se espera: " + t + ".\n"
+                        + "se espera: " + codeToString(tokenEsperado) + ".\n"
                         + "¿Desea detener la ejecución?",
                 "Ha ocurrido un error",
                 JOptionPane.YES_NO_OPTION)) {
@@ -324,9 +324,76 @@ public class Parser {
             default:
                 codigo = 13;
                 break;
-
         }
         return codigo;
+    }
+
+    public String codeToString(int codigo) {
+
+        String cadena = "";
+        switch (codigo) {
+            case 1:
+                cadena = "if";
+                break;
+            case 2:
+                cadena = "then";
+                break;
+            case 3:
+                cadena = "else";
+                break;
+            case 4:
+                cadena = "begin";
+                break;
+            case 5:
+                cadena = "end";
+                break;
+            case 6:
+                cadena = "print";
+                break;
+            case 19:
+                cadena = "while";
+                break;
+            case 20:
+                cadena = "do";
+                break;
+            case 7:
+                cadena = ";";
+                break;
+            case 8:
+                cadena = "+";
+                break;
+            case 9:
+                cadena = ":=";
+                break;
+            case 10:
+                cadena = "==";
+                break;
+            case 11:
+                cadena = "int";
+                break;
+            case 12:
+                cadena = "float";
+                break;
+            case 14:
+                cadena = "long";
+                break;
+            case 15:
+                cadena = "double";
+                break;
+            case 16:
+                cadena = "-";
+                break;
+            case 17:
+                cadena = "*";
+                break;
+            case 18:
+                cadena = "/";
+                break;
+            default:
+                cadena = "id";
+                break;
+        }
+        return cadena;
     }
 
     // Métodos para recoger la información de los tokens para luego mostrarla
