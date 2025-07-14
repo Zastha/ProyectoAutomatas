@@ -15,7 +15,7 @@ public class Parser {
     private final Scanner s;
     final int ifx = 1, thenx = 2, elsex = 3, beginx = 4, endx = 5, printx = 6, semi = 7,
             sum = 8, igual = 9, igualdad = 10, intx = 11, floatx = 12, id = 13, longx = 14, doublex = 15, res = 16,
-            multi = 17, div = 18, whilex = 19, dox = 20;
+            multi = 17, div = 18, whilex = 19, dox = 20, repeatx = 21, untilx = 22;
     private int tknCode, tokenEsperado;
     private String token, tokenActual, log;
 
@@ -150,8 +150,15 @@ public class Parser {
                 Statx sWhile = S();
                 return new Whilex(eWhile, sWhile);
 
+            case repeatx:
+                eat(repeatx);
+                Statx sRepeat = S();
+                eat(untilx);
+                Expx eRepeat = E();
+                return new Repeatx(sRepeat, eRepeat);
+
             default:
-                error(token, "(if | begin | id | print | while)");
+                error(token, "(if | begin | id | print | while | repeat)");
                 return null;
         }
     }
@@ -169,69 +176,70 @@ public class Parser {
     }
 
     public Expx E() {
-    if (tknCode == id) {
-        String left = token;
+        if (tknCode == id) {
+            String left = token;
 
-        declarationCheck(left);
-        eat(id);
-        
-        
-        if (tknCode == 8 || tknCode == 16 || tknCode == 17 || tknCode == 18) { 
+            declarationCheck(left);
+            eat(id);
 
-            int operator = tknCode; 
-            eat(tknCode); 
-            
-            if (tknCode == id) {
-                String right = token;
+            if (tknCode == 8 || tknCode == 16 || tknCode == 17 || tknCode == 18) {
 
+                int operator = tknCode;
+                eat(tknCode);
 
-                declarationCheck(right);
-                eat(id);
-                compatibilityCheck(left, right);
-                
-         
-                switch (operator) {
+                if (tknCode == id) {
+                    String right = token;
 
-                    case 8:   return new Sumax(new Idx(left), new Idx(right));      
-                    case 16:    return new Restax(new Idx(left), new Idx(right)); 
-                    case 17:    return new Multix(new Idx(left), new Idx(right));  
-                    case 18:    return new Divix(new Idx(left), new Idx(right));    
-                    default:    throw new RuntimeException("Unknown operator");
+                    declarationCheck(right);
+                    eat(id);
+                    compatibilityCheck(left, right);
+
+                    switch (operator) {
+
+                        case 8:
+                            return new Sumax(new Idx(left), new Idx(right));
+                        case 16:
+                            return new Restax(new Idx(left), new Idx(right));
+                        case 17:
+                            return new Multix(new Idx(left), new Idx(right));
+                        case 18:
+                            return new Divix(new Idx(left), new Idx(right));
+                        default:
+                            throw new RuntimeException("Unknown operator");
+
+                    }
+                } else {
+
+                    error(token, "(id)");
+                    return null;
 
                 }
+            } else if (tknCode == igualdad) {
+
+                eat(igualdad);
+                if (tknCode == id) {
+
+                    String right = token;
+
+                    declarationCheck(right);
+                    eat(id);
+                    compatibilityCheck(left, right);
+
+                    return new Comparax(new Idx(left), new Idx(right));
+                } else {
+
+                    error(token, "(id)");
+                    return null;
+                }
             } else {
-
-                error(token, "(id)");
-                return null;
-
-
-            }
-        } else if (tknCode == igualdad) { 
-
-            eat(igualdad);
-            if (tknCode == id) {
-
-                String right = token;
-
-                declarationCheck(right);
-                eat(id);
-                compatibilityCheck(left, right);
-
-                return new Comparax(new Idx(left), new Idx(right));
-            } else {
-
-                error(token, "(id)");
+                error(token, "(== | + | - | * | /)");
                 return null;
             }
         } else {
-            error(token, "(== | + | - | * | /)");
+            error(token, "(id)");
             return null;
         }
-    } else {
-        error(token, "(id)");
-        return null;
-    }
-} // FIN DEL ANÁLISIS SINTÁCTICO
+    } // FIN DEL ANÁLISIS SINTÁCTICO
 
     public void error(String token, String t) {
         switch (JOptionPane.showConfirmDialog(null,
@@ -287,6 +295,12 @@ public class Parser {
                 break;
             case "do":
                 codigo = 20;
+                break;
+            case "repeat":
+                codigo = 21;
+                break;
+            case "until":
+                codigo = 22;
                 break;
             case ";":
                 codigo = 7;
@@ -356,6 +370,12 @@ public class Parser {
             case 20:
                 cadena = "do";
                 break;
+            case 21:
+                cadena = "repeat";
+                break;
+            case 22:
+                cadena = "until";
+                break;
             case 7:
                 cadena = ";";
                 break;
@@ -423,7 +443,7 @@ public class Parser {
         System.out.println("-----------------");
         for (int i = 0; i < tablaSimbolos.size(); i++) {
             Declarax dx;
-            //Typex tx;
+            // Typex tx;
             dx = (Declarax) tablaSimbolos.get(i);
             variable[i] = dx.s1;
             tipo[i] = dx.s2.getTypex();
@@ -462,16 +482,16 @@ public class Parser {
         System.out.println("CHECANDO COMPATIBILIDAD ENTRE TIPOS (" + s1 + ", " + s2 + "). ");
         boolean termino = false;
         for (int i = 0; i < tablaSimbolos.size(); i++) {
-            //elementoCompara1 = (Declarax) tablaSimbolos.elementAt(i);
-            elementoCompara1 =  variable[i];
+            // elementoCompara1 = (Declarax) tablaSimbolos.elementAt(i);
+            elementoCompara1 = variable[i];
             tipoCompara1 = tipo[i];
-           // if (s1.equals(elementoCompara1.s1)) {
-                if (s1.equals(elementoCompara1)) {
+            // if (s1.equals(elementoCompara1.s1)) {
+            if (s1.equals(elementoCompara1)) {
                 System.out.println("Se encontró el primer elemento en la tabla de símbolos...");
                 for (int j = 0; j < tablaSimbolos.size(); j++) {
-                    //elementoCompara2 = (Declarax) tablaSimbolos.elementAt(j);
+                    // elementoCompara2 = (Declarax) tablaSimbolos.elementAt(j);
                     elementoCompara2 = variable[j];
-                    tipoCompara2 = tipo[j]; 
+                    tipoCompara2 = tipo[j];
                     if (s2.equals(elementoCompara2)) {
                         System.out.println("Se encontró el segundo elemento en la tabla de símbolos...");
                         if (tipoCompara1.equals(tipoCompara2)) {

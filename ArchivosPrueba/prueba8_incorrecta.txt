@@ -1,0 +1,10 @@
+var1 int ;
+var2 long ;
+
+begin
+    repeat
+        if var1 == var2 then
+            print var1 + var2 
+        else 
+            print var1 - var2  
+end
