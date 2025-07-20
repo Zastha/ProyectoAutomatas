@@ -7,7 +7,6 @@ import javax.swing.JOptionPane;
 public class Scanner {
 
     // DECLARACIONES
-    private int contar = 0;
     private int lineaNo, k, longitud;
     private final String[] tokens;
     private String tipoToken;
@@ -43,7 +42,6 @@ public class Scanner {
         if (b) {
             if (k < tokens.length - 1) {
                 k++;
-                contar++;
             }
         }
 
@@ -136,13 +134,8 @@ public class Scanner {
         return longitud;
     }
 
-    public int getContar() {
-        contar -= 1;
-        return contar + 1;
-    }
-
     public String getTokenQuedado() {
-        tokenQuedado = tokens[contar];
+        tokenQuedado = tokens[k];
         return tokenQuedado;
     }
     // public void restoTokens(){

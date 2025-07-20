@@ -17,8 +17,9 @@ public class Parser {
             sum = 8, igual = 9, igualdad = 10, intx = 11, floatx = 12, id = 13, longx = 14, doublex = 15, res = 16,
             multi = 17, div = 18, whilex = 19, dox = 20, repeatx = 21, untilx = 22;
     private int tknCode, tokenEsperado;
+    private static int contador = 0;
     private String token, tokenActual, log;
-
+    
     // Sección de bytecode
     private int cntBC = 0; // Contador de lineas para el código bytecode
     private String bc; // String temporal de bytecode
@@ -41,6 +42,7 @@ public class Parser {
      */
 
     public Parser(String codigo) {
+        
         s = new Scanner(codigo);
         token = s.getToken(true);
         tknCode = stringToCode(token);
@@ -49,6 +51,7 @@ public class Parser {
 
     // INICIO DE ANÁLISIS SINTÁCTICO
     public void advance() {
+        contador++;
         token = s.getToken(true);
         tokenActual = s.getToken(false);
         tknCode = stringToCode(token);
@@ -68,8 +71,9 @@ public class Parser {
         Declarax d = D();
         createTable();
         Statx s = S();
+        System.out.println();
 
-        if (this.s.getLongitud() - 1 != this.s.getContar()) {
+        if (this.s.getLongitud() != contador) {
             System.out.println(
                     "Hay más tokens después de terminar los estatutos. Los siguientes tokens no fueron tomados en cuenta para el análisis");
             errorSobrante(this.s.getTokenQuedado(), "Hay tokens más allá de los estatutos evaluados");
