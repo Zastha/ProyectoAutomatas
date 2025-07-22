@@ -1,9 +1,6 @@
-//package Compiler;
-
 import javax.swing.JOptionPane;
 import ArbolSintactico.*;
 import java.util.Vector;
-import org.apache.commons.lang3.ArrayUtils;
 
 public class Parser {
     // Declaración de variables----------------
@@ -18,20 +15,13 @@ public class Parser {
             multi = 17, div = 18, whilex = 19, dox = 20, repeatx = 21, untilx = 22;
     private int tknCode, tokenEsperado;
     private static int contador = 0;
-    private String token, tokenActual, log;
+    private String token,  log;
     
     // Sección de bytecode
     private int cntBC = 0; // Contador de lineas para el código bytecode
-    private String bc; // String temporal de bytecode
-    private int jmp1, jmp2, jmp3;
-    private int aux1, aux2, aux3;
     private String pilaBC[] = new String[100];
-    private String memoriaBC[] = new String[10];
-    private String pilaIns[] = new String[50];
-    private int retornos[] = new int[10];
     private int cntIns = 0;
 
-    private StringBuilder codigoByteCode;
     // ---------------------------------------------
 
     /*
@@ -56,7 +46,6 @@ public class Parser {
     public void advance() {
         contador++;
         token = s.getToken(true);
-        tokenActual = s.getToken(false);
         tknCode = stringToCode(token);
     }
 
@@ -128,10 +117,9 @@ public class Parser {
             case ifx:
                 eat(ifx);
                 Expx e1 = E();
-                ipbc(cntIns + ": iflez go ");
+                ipbc(cntIns + ": iflez goto ");
                 int saltoElse = cntBC-1;
                 eat(thenx);
-                
                 Statx s1 = S();
                 ipbc(cntIns + ": goto ");
                 int saltoIf = cntBC-1;
@@ -168,7 +156,7 @@ public class Parser {
                 eat(whilex);
                 int inicioWhile = cntBC;
                 Expx eWhile = E();
-                
+                ipbc(cntIns + ": iflez goto ");
                 int saltoCondicional= cntBC - 1;
                 eat(dox);
                 Statx sWhile = S();
@@ -178,9 +166,11 @@ public class Parser {
 
             case repeatx:
                 eat(repeatx);
+                int inicioRepeat = cntBC;
                 Statx sRepeat = S();
                 eat(untilx);
                 Expx eRepeat = E();
+                ipbc(cntIns+": ifg goto "+inicioRepeat);
                 return new Repeatx(sRepeat, eRepeat);
 
             default:
@@ -576,33 +566,27 @@ public class Parser {
             case "igualdad":
                 ipbc(cntIns + ": " + prefijo1 + "load_" + pos1);
                 ipbc(cntIns + ": " + prefijo2 + "load_" + pos2);
-                ipbc(cntIns + ": if_"+prefijoSigma+"cmpeq" );
-                jmp1 = cntBC;
+                ipbc(cntIns + ": if_"+prefijoSigma+"cmpeq");
                 break;
-
             case "suma":
                 ipbc(cntIns + ": " + prefijo1 + "load_" + pos1);
                 ipbc(cntIns + ": " + prefijo2 + "load_" + pos2);
                 ipbc(cntIns + ": " + prefijoSigma + "add");
-                jmp2 = cntBC;
                 break;
             case "resta":
                 ipbc(cntIns + ": " + prefijo1 + "load_" + pos1);
                 ipbc(cntIns + ": " + prefijo2 + "load_" + pos2);
                 ipbc(cntIns + ": " + prefijoSigma + "sub");
-                jmp2 = cntBC;
                 break;
             case "multiplicacion":
                 ipbc(cntIns + ": " + prefijo1 + "load_" + pos1);
                 ipbc(cntIns + ": " + prefijo2 + "load_" + pos2);
                 ipbc(cntIns + ": " + prefijoSigma + "mul");
-                jmp2 = cntBC;
                 break;
             case "division":
                 ipbc(cntIns + ": " + prefijo1 + "load_" + pos1);
                 ipbc(cntIns + ": " + prefijo2 + "load_" + pos2);
                 ipbc(cntIns + ": " + prefijoSigma + "div");
-                jmp2 = cntBC;
                 break;
         }
     }
@@ -614,16 +598,12 @@ public class Parser {
                 pos1 = i;
             }
         }
-
         String prefijo = preTipo(s1);
         switch (simbolo) {
             case "igual":
                 ipbc(cntIns + ": " + prefijo + "store_" + pos1);
-                jmp2 = cntBC;
             break;
 
-
-            
         }
     }
 
@@ -661,15 +641,6 @@ public class Parser {
         } else {
             return null;
         }
-    }
-
-    private String tipoVariable(String nombreVar) {
-        for (int i = 0; i < variable.length; i++) {
-            if (nombreVar.equals(variable[i])) {
-                return tipo[i];
-            }
-        }
-        return "int";
     }
 
     private String preTipo(String tipo) {
