@@ -30,6 +30,8 @@ public class Parser {
     private String pilaIns[] = new String[50];
     private int retornos[] = new int[10];
     private int cntIns = 0;
+
+    private StringBuilder codigoByteCode;
     // ---------------------------------------------
 
     /*
@@ -42,11 +44,12 @@ public class Parser {
      */
 
     public Parser(String codigo) {
-        
         s = new Scanner(codigo);
         token = s.getToken(true);
         tknCode = stringToCode(token);
         p = P();
+        ipbc(cntBC +" : end");
+        System.out.println(getBytecode());
     }
 
     // INICIO DE ANÁLISIS SINTÁCTICO
@@ -91,6 +94,7 @@ public class Parser {
             eat(semi);
             Declarax decl = new Declarax(s, t);
             tablaSimbolos.addElement(decl);
+       
             D();
             return decl;
         } else {
@@ -118,14 +122,24 @@ public class Parser {
     }
 
     public Statx S() { // return statement
+        
         switch (tknCode) {
+            
             case ifx:
                 eat(ifx);
                 Expx e1 = E();
+                ipbc(cntIns + ": iflez go ");
+                int saltoElse = cntBC-1;
                 eat(thenx);
+                
                 Statx s1 = S();
+                ipbc(cntIns + ": goto ");
+                int saltoIf = cntBC-1;
+                pilaBC[saltoElse] += String.valueOf(cntBC);
                 eat(elsex);
                 Statx s2 = S();
+                pilaBC[saltoIf] += String.valueOf(cntBC);
+                
                 return new Ifx(e1, s1, s2);
 
             case beginx:
@@ -140,18 +154,26 @@ public class Parser {
                 declarationCheck(varName);
                 eat(igual); // :=
                 Expx e = E();
+                byteCode("igual", varName);
                 return new Asignax(new Idx(varName), e);
 
             case printx:
                 eat(printx);
+                ipbc(cntIns + ": getstatic      #7");
                 e = E();
+                ipbc(cntIns + ": invokevirtual   #13");
                 return new Printx(e);
 
             case whilex:
                 eat(whilex);
+                int inicioWhile = cntBC;
                 Expx eWhile = E();
+                
+                int saltoCondicional= cntBC - 1;
                 eat(dox);
                 Statx sWhile = S();
+                ipbc(cntIns + ": goto " + inicioWhile);
+                pilaBC[saltoCondicional] += String.valueOf(cntBC);
                 return new Whilex(eWhile, sWhile);
 
             case repeatx:
@@ -199,14 +221,17 @@ public class Parser {
                     compatibilityCheck(left, right);
 
                     switch (operator) {
-
                         case 8:
+                            byteCode("suma", left, right);
                             return new Sumax(new Idx(left), new Idx(right));
                         case 16:
+                            byteCode("resta", left, right);
                             return new Restax(new Idx(left), new Idx(right));
                         case 17:
+                            byteCode("multiplicacion", left, right);
                             return new Multix(new Idx(left), new Idx(right));
                         case 18:
+                            byteCode("division", left, right);
                             return new Divix(new Idx(left), new Idx(right));
                         default:
                             throw new RuntimeException("Unknown operator");
@@ -228,6 +253,7 @@ public class Parser {
                     declarationCheck(right);
                     eat(id);
                     compatibilityCheck(left, right);
+                    byteCode("igualdad", left, right);
 
                     return new Comparax(new Idx(left), new Idx(right));
                 } else {
@@ -454,8 +480,6 @@ public class Parser {
             System.out.println(variable[i] + ": " + tipo[i]); // Imprime tabla de símbolos por consola.
         }
 
-        ArrayUtils.reverse(variable);
-        ArrayUtils.reverse(tipo);
 
         System.out.println("-----------------\n");
     }
@@ -527,26 +551,32 @@ public class Parser {
         }
     }
 
-    public void byteCode(String tipo, String s1, String s2) {
+    public void byteCode(String simbolo, String s1, String s2) {
         int pos1 = -1, pos2 = -1;
+        
 
         for (int i = 0; i < variable.length; i++) {
             if (s1.equals(variable[i])) {
                 pos1 = i;
+
             }
             if (s2.equals(variable[i])) {
                 pos2 = i;
             }
         }
+        
+        String tipo1 = tipo[pos1];
+        String tipo2 = tipo[pos2];
+     
 
-        String prefijo1 = preTipo(s1);
-        String prefijo2 = preTipo(s2);
-        String prefijoSigma = preTipo(tipoSigma(s1, s2));
-        switch (tipo) {
+        String prefijo1 = preTipo(tipo1);
+        String prefijo2 = preTipo(tipo2);
+        String prefijoSigma = preTipo(tipoSigma(tipo1, tipo2));
+        switch (simbolo) {
             case "igualdad":
                 ipbc(cntIns + ": " + prefijo1 + "load_" + pos1);
                 ipbc(cntIns + ": " + prefijo2 + "load_" + pos2);
-                ipbc(cntIns + ": ifne " + (cntIns + 4));
+                ipbc(cntIns + ": if_"+prefijoSigma+"cmpeq" );
                 jmp1 = cntBC;
                 break;
 
@@ -577,24 +607,30 @@ public class Parser {
         }
     }
 
-    public void byteCode(String tipo, String s1) {
+    public void byteCode(String simbolo, String s1) {
         int pos1 = -1;
         for (int i = 0; i < variable.length; i++) {
             if (s1.equals(variable[i])) {
                 pos1 = i;
             }
         }
+
         String prefijo = preTipo(s1);
-        switch (tipo) {
+        switch (simbolo) {
             case "igual":
-                pilaBC[cntBC + 3] = cntIns + 4 + ": " + prefijo + "store_" + pos1;
-                cntIns++;
+                ipbc(cntIns + ": " + prefijo + "store_" + pos1);
                 jmp2 = cntBC;
-                break;
+            break;
+
+
+            
         }
     }
 
+
+
     public void ipbc(String ins) {
+        
         while (pilaBC[cntBC] != null) {
             cntBC++;
         }
